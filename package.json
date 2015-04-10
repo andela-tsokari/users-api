@@ -1,0 +1,21 @@
+{
+  "name": "users-api",
+  "version": "1.0.0",
+  "description": "a user api made using expressJS, nodeJS, postgresql and bookshelf orm",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bookshelf": "^0.7.9",
+    "express": "^4.12.3",
+    "pg": "^4.3.0"
+  },
+  "devDependencies": {
+    "jasmine-node": "^1.14.5",
+    "nodemon": "^1.3.7",
+    "supertest": "^0.15.0"
+  }
+}
