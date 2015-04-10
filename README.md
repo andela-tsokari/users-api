@@ -4,6 +4,7 @@
 As part of the micro-service being built, the user service api is for our larger application.
 
 It uses the following tools.
+
 1. NodeJS.
 2. ExpressJS.
 3. PostgreSQL.
