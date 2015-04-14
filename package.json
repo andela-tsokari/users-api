@@ -4,14 +4,15 @@
   "description": "a user api made using expressJS, nodeJS, postgresql and bookshelf orm",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start-dev": "nodemon server.js",
+    "test": "export NODE_ENV=test && jasmine-node ./tests --autotest --watch --color"
   },
   "author": "Tams Sokari",
   "license": "MIT",
   "dependencies": {
     "bookshelf": "^0.7.9",
     "express": "^4.12.3",
-    "json-web-token": "^1.4.3",
+    "jsonwebtoken": "^5.0.0",
     "knex": "^0.7.6",
     "pg": "^4.3.0"
   },
