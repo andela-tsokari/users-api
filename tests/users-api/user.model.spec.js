@@ -7,8 +7,8 @@ describe('User API unit tests: ', function () {
   beforeEach(function (done) {
     // body...
     user = new userModel({
-      username: 'isaacsokari',
-      password: '1t1msSok1r34'
+      username: 'freedom',
+      password: 'gobbledeedock'
     });
     done();
   });
@@ -22,8 +22,8 @@ describe('User API unit tests: ', function () {
           // body...
           expect(model.attributes)
             .toEqual(jasmine.objectContaining({
-              "username": "isaacsokari",
-              "password": "1t1msSok1r34"
+              "username": "freedom",
+              "password": "gobbledeedock"
             }));
           done();
         });
