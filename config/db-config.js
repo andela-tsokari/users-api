@@ -4,7 +4,9 @@ module.exports = (function () {
   return {
             db: { 
                   development: {
-                    connection: {
+                    'client': 'pg',
+                    'connection': {
+                      'host': 'localhost',
                       'user': 'tams',
                       'database': 'users'
                     }
