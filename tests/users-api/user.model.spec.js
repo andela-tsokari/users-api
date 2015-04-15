@@ -132,6 +132,31 @@ describe('User API unit tests: ', function () {
           done();
         });
     });
+
+  });
+  
+  xdescribe('template: ', function() {
+    beforeEach(function (done) {
+      // body...
+      user = userModel.forge({
+        first_name: 'papandrea',
+        last_name: 'roberto',
+        email: 'r2p2@jk.com',
+        username: 'modeerf',
+        password: 'gobbledeedock'
+      });
+      user.save()
+        .then(function() {
+          done();
+        });
+    });
+
+    afterEach(function (done) {
+      knex('users').where('username', 'modeerf').del()
+        .then(function(){
+          done();
+        });
+      });
   });
 
 });
