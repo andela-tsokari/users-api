@@ -25,9 +25,13 @@ knex.schema.hasTable('users')
     }
   });
 
-var userModel = bookshelf.Model.extend({
+var user = bookshelf.Model.extend({
   tableName: 'users',
   hasTimestamps: ['joined_on', 'last_update']
 });
 
-module.exports = userModel;
+var users = bookshelf.Collection.extend({
+  model: user
+})
+
+module.exports = [user, users];
