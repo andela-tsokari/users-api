@@ -19,6 +19,17 @@ module.exports = (function () {
                       'user': 'tams',
                       'database': 'users-test'
                     }
+                  },
+
+                  production: {
+                    'client': 'pg',
+                    'connection': {
+                      'port': 5432,
+                      'host': 'ec2-54-163-239-102.compute-1.amazonaws.com',
+                      'user': 'qdvjqttcufavvh',
+                      'password': '-7JYkkBA35vvLQR4B9LB7Mzivs',
+                      'database': 'd4rul9ngpaiqnb'
+                    }
                   }
 
                 },
