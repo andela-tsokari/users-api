@@ -9,11 +9,11 @@ knex.schema.hasTable('users')
     // body...
     if (!exists) {
       bookshelf.knex.schema.createTable('users', function(table) {
-        table.increments('id').primary();
+        table.increments('user_id').primary();
         table.string('first_name', 30).notNullable();
         table.string('last_name', 30).notNullable();
-        table.string('email', 30).unique().notNullable();
-        table.string('username', 30).unique().notNullable();
+        table.string('email', 30).notNullable().unique();
+        table.string('username', 30).notNullable().unique();
         table.string('password', 30).notNullable();
         table.boolean('admin').defaultTo(false);
         table.timestamp('joined_on');
@@ -27,6 +27,10 @@ knex.schema.hasTable('users')
 
 var user = bookshelf.Model.extend({
   tableName: 'users',
+  idAttribute: 'user_id',
+  defaults: {
+    admin: false
+  },
   hasTimestamps: ['joined_on', 'last_update']
 });
 
