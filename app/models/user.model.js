@@ -17,7 +17,7 @@ knex.schema.hasTable('users')
         table.string('password', 30).notNullable();
         table.boolean('admin').defaultTo(false);
         table.timestamp('joined_on');
-        table.timestamp('last_update');
+        table.timestamp('last_updated');
       })
       .then(function() {
         console.log('Table has been created');
@@ -31,7 +31,7 @@ var user = bookshelf.Model.extend({
   defaults: {
     admin: false
   },
-  hasTimestamps: ['joined_on', 'last_update']
+  hasTimestamps: ['joined_on', 'last_updated']
 });
 
 var users = bookshelf.Collection.extend({
