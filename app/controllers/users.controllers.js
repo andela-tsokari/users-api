@@ -1,80 +1,137 @@
 var user = require('./../models/user.model')[0];
-var encrypt = require('bcrypt')
+var encrypt = require('bcrypt');
 
 module.exports = {
-  getAllUsers: function(request, response) {
-    user
-      .fetch()
-        .then(function(error, users) {
-          if(error){
-            response.json({message: 'there are no users saved'});
-          }
-          else {
-            response.json(users);
-          }
-        });
-
-  },
-
-  getOneUser: function(request, response) {
-    var user = request.params.username;
-
-    user
-      .where({username: user})
-        .then(function(error, user) {
-          if(error){
-            response.json({message: 'there is no user with this username'});
-          }
-          else {
-            response.json(user);
-          }
-        });
-
-  },
-
+  //successful signup request
   signUp: function(request, response) {
     if(!(request.body.first_name && request.body.last_name && request.body.email && request.body.username && request.body.password)) {
       response
         .status(400)
-          .json({message: 'check that all form fields are filled'});
+          .json({
+            message: 'check that all form fields are filled'
+          });
     }
-    else{
+
+    else {
       user
-        .forge({
-          email: request.body.email,
-          username: request.body.username
-        })
+        .where({email: request.body.email})
           .fetch()
-            .then(function(user) {
-              if(user) {
+            .then(function(dbuser) {
+              if(dbuser) {
                 response
-                  .status(400)
+                  .status(401)
                     .json({
-                      message: 'a user already exist with these details',
-                      data: request.body
+                      message: "a user with email: " + request.body.email + " already exists"
                     });
               }
               else {
                 user
-                  .forge({
-                    first_name: request.body.first_name,
-                    last_name: request.body.last_name,
-                    email: request.body.email,
-                    username: request.body.username,
-                    password: request.body.password
-                  })
-                    .save()
-                      .then(function(user) {
-                        response
-                          .status(200)
-                            .json({
-                              message: 'User has been successfully created',
-                              data: request.body
-                            });
+                  .where({username: request.body.username})
+                    .fetch()
+                      .then(function(dbuser) {
+                        if (dbuser){
+                          response
+                            .status(401)
+                              .json({
+                                message: "a user with username: " + request.body.username + " already exists"
+                              });
+                        }
+                        else {
+                          user
+                            .forge({
+                              first_name: request.body.first_name,
+                              last_name: request.body.last_name,
+                              email: request.body.email,
+                              username: request.body.username,
+                              password: request.body.password
+                            })
+                              .save()
+                                .then(function(savedUser) {
+                                  response
+                                    .status(200)
+                                      .json({
+                                        message: "user saved successfully"
+                                      });
+                                });
+
+                        }
                       });
               }
-            })
+            });
     }
+
+  },
+
+  //successful request to get users
+  getAllUsers: function(request, response) {
+    user
+      .fetchAll()
+        .then(function(user) {
+          if(user){
+            user
+              .fetch()
+                .then(function(user) {
+                  response
+                    .status(200)
+                      .json({
+                        data: user.toJSON()
+                      });
+                })
+                .catch(function(error) {
+                  response
+                    .status(401)
+                      .json({
+                        message: 'there are no users saved'
+                      });
+                    });
+          }
+        });
+  
+  },
+
+  //successful request to get one user.
+  getOneUser: function(request, response) {
+    user
+      .where({username: request.params.username})
+        .fetch()
+          .then(function(user) {
+            if(user) {
+              response
+                .status(200)
+                  .json({
+                    data: user.toJSON()
+                  });
+            }
+            else if(!user) {
+              response
+                .status(400)
+                  .json({
+                    message: 'user does not exist'
+                  });
+            }
+          });
+
+  },
+  //successful update user request
+  updateOneUser: function(request, response) {
+    user
+      .where({username: request.params.username})
+        .save(request.body, {
+          method: 'update',
+          patch: true
+        })
+          .then(function(changedUser) {
+            response
+              .status(200)
+                .json({
+                  message: 'your details have been changed successfully',
+                  data: changedUser.toJSON()
+                });
+          });
+
+  },
+
+  deleteUser: function(request, response) {
 
   },
 
@@ -86,5 +143,7 @@ module.exports = {
     user
       .where({username: username})
         .fetch
+  
   }
+
 };
