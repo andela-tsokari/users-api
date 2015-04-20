@@ -42,10 +42,10 @@ var user = bookshelf.Model.extend({
     checkPassword: function(password) {
       return encrypt.compareSync(password, this.password);
     }    
-});
+}); 
 
 var users = bookshelf.Collection.extend({
   model: user
-})
+});
 
 module.exports = [user, users];
