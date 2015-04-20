@@ -4,6 +4,8 @@ var knex = require('knex')(dbConfig.db[process.env.NODE_ENV]);
 
 var bookshelf = require('bookshelf')(knex);
 
+var encrypt = require('bcrypt');
+
 knex.schema.hasTable('users')
   .then( function (exists) {
     // body...
@@ -14,7 +16,7 @@ knex.schema.hasTable('users')
         table.string('last_name', 30).notNullable();
         table.string('email', 30).notNullable().unique();
         table.string('username', 30).notNullable().unique();
-        table.string('password', 30).notNullable();
+        table.string('password').notNullable();
         table.boolean('admin').defaultTo(false);
         table.timestamp('joined_on');
         table.timestamp('last_updated');
@@ -26,12 +28,20 @@ knex.schema.hasTable('users')
   });
 
 var user = bookshelf.Model.extend({
-  tableName: 'users',
-  idAttribute: 'user_id',
-  defaults: {
-    admin: false
+    tableName: 'users',
+    idAttribute: 'user_id',
+    defaults: {
+      admin: false
+    },
+    hasTimestamps: ['joined_on', 'last_updated']
   },
-  hasTimestamps: ['joined_on', 'last_updated']
+  {
+    hidePassword: function(password) {
+      return encrypt.hashSync(password, encrypt.genSaltSync(10));
+    },
+    checkPassword: function(password) {
+      return encrypt.compareSync(password, this.password);
+    }    
 });
 
 var users = bookshelf.Collection.extend({
