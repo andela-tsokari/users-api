@@ -1,5 +1,6 @@
 var user = require('./../models/user.model')[0];
-var encrypt = require('bcrypt');
+var jwt = require('jsonwebtoken');
+var secret = require('./../../config/db-config').secret;
 
 module.exports = {
   //successful signup request
@@ -131,19 +132,64 @@ module.exports = {
 
   },
 
+  //successful delete user request
   deleteUser: function(request, response) {
+    user
+      .where({username: request.params.username})
+        .destroy()
+          .then(function(deletedUser) {
+            response
+              .status(200)
+                .json({
+                  message: 'user was successfully deleted',
+                  data: deletedUser.toJSON()
+                });
+          });
 
   },
 
+  //successful simple login
   login: function(request, response) {
     if(!(request.body.username && request.body.password)) {
+      response
+        .status(400)
+          .json({
+            message: 'Username and Password Required'
+          });
+    }
+    else {
+        user
+          .where({
+            username: request.body.username,
+            password: request.body.password
+          })
+          .fetch()
+            .then(function(dbuser) {
+              if(dbuser){
+                console.log(dbuser.attributes);
+                var profile = {
+                  username: dbuser.attributes.username,
+                  password: dbuser.attributes.password
+                }
+                
+                var token = jwt.sign(profile, secret);
 
+                response
+                  .status(200)
+                    .json({
+                      message: 'you are signed in',
+                      access_token: token
+                    });
+              }
+              else {
+                response
+                  .json({
+                    error: 'Incorrect Username/Password'
+                  });
+              }
+            });
     }
 
-    user
-      .where({username: username})
-        .fetch
-  
   }
 
 };
