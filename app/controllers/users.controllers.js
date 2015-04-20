@@ -1,64 +1,88 @@
 var user = require('./../models/user.model')[0];
 var jwt = require('jsonwebtoken');
+var bcrypt = require('bcrypt');
 var secret = require('./../../config/db-config').secret;
 
 module.exports = {
-  //successful signup request
+  //successful signup request, using bcrypt
   signUp: function(request, response) {
     if(!(request.body.first_name && request.body.last_name && request.body.email && request.body.username && request.body.password)) {
       response
         .status(400)
-          .json({
-            message: 'check that all form fields are filled'
-          });
+        .json({
+          message: 'check that all form fields are filled'
+        });
     }
 
     else {
       user
         .where({email: request.body.email})
-          .fetch()
-            .then(function(dbuser) {
-              if(dbuser) {
-                response
-                  .status(401)
+        .fetch()
+        .then(function(dbuser) {
+          if(dbuser) {
+            response
+              .status(401)
+              .json({
+                message: "a user with email: " + request.body.email + " already exists"
+              });
+          }
+          else {
+            user
+              .where({username: request.body.username})
+              .fetch()
+              .then(function(dbuser) {
+                if (dbuser){
+                  response
+                    .status(401)
                     .json({
-                      message: "a user with email: " + request.body.email + " already exists"
+                      message: "a user with username: " + request.body.username + " already exists"
                     });
-              }
-              else {
-                user
-                  .where({username: request.body.username})
-                    .fetch()
-                      .then(function(dbuser) {
-                        if (dbuser){
-                          response
-                            .status(401)
-                              .json({
-                                message: "a user with username: " + request.body.username + " already exists"
-                              });
-                        }
-                        else {
-                          user
-                            .forge({
-                              first_name: request.body.first_name,
-                              last_name: request.body.last_name,
-                              email: request.body.email,
-                              username: request.body.username,
-                              password: request.body.password
-                            })
-                              .save()
-                                .then(function(savedUser) {
+                }
+                else {
+                  user
+                    .forge({
+                      first_name: request.body.first_name,
+                      last_name: request.body.last_name,
+                      email: request.body.email,
+                      username: request.body.username,
+                      password: request.body.password
+                    })
+                    .save()
+                    .then(function(savedUser) {
+                      savedUser
+                        .fetch()
+                        .then(function(userForEdit) {
+                          bcrypt.hash(userForEdit.get('password'), 10, function(err, hash) {
+                            if(hash) {
+                              userForEdit
+                                .save({
+                                  password: hash
+                                }, {
+                                  method: 'update',
+                                  patch: true
+                                })
+                                .then(function(updatedSavedUser) {
                                   response
                                     .status(200)
-                                      .json({
-                                        message: "user saved successfully"
-                                      });
+                                    .json({
+                                      message: 'user password has been hidden',
+                                      data: updatedSavedUser.toJSON()
+                                    });
                                 });
-
-                        }
-                      });
-              }
-            });
+                            }
+                            else {
+                              response
+                                .json({
+                                  error: error.message
+                                });
+                            }
+                          });
+                        });
+                    });
+                }
+              });
+          }
+        });
     }
 
   },
@@ -67,26 +91,32 @@ module.exports = {
   getAllUsers: function(request, response) {
     user
       .fetchAll()
-        .then(function(user) {
-          if(user){
-            user
-              .fetch()
-                .then(function(user) {
-                  response
-                    .status(200)
-                      .json({
-                        data: user.toJSON()
-                      });
-                })
-                .catch(function(error) {
-                  response
-                    .status(401)
-                      .json({
-                        message: 'there are no users saved'
-                      });
-                    });
-          }
-        });
+      .then(function(users) {
+        if(users){
+          users
+            .fetch()
+            .then(function(user) {
+              response
+                .status(200)
+                .json({
+                  data: user.toJSON()
+                });
+            })
+            .catch(function(error) {
+              response
+                .status(401)
+                .json({
+                  message: 'there are no users saved'
+                });
+            });
+        }
+        else {
+          response
+            .json({
+              error: 'there are no users in this database'
+            });
+        }
+      });
   
   },
 
@@ -94,41 +124,42 @@ module.exports = {
   getOneUser: function(request, response) {
     user
       .where({username: request.params.username})
-        .fetch()
-          .then(function(user) {
-            if(user) {
-              response
-                .status(200)
-                  .json({
-                    data: user.toJSON()
-                  });
-            }
-            else if(!user) {
-              response
-                .status(400)
-                  .json({
-                    message: 'user does not exist'
-                  });
-            }
-          });
+      .fetch()
+      .then(function(singleUser) {
+        if(singleUser) {
+          response
+            .status(200)
+            .json({
+              data: singleUser.toJSON()
+            });
+        }
+        else if(!singleUser) {
+          response
+            .status(400)
+            .json({
+              message: 'user does not exist'
+            });
+        }
+      });
 
   },
+
   //successful update user request
   updateOneUser: function(request, response) {
     user
       .where({username: request.params.username})
-        .save(request.body, {
-          method: 'update',
-          patch: true
-        })
-          .then(function(changedUser) {
-            response
-              .status(200)
-                .json({
-                  message: 'your details have been changed successfully',
-                  data: changedUser.toJSON()
-                });
+      .save(request.body, {
+        method: 'update',
+        patch: true
+      })
+      .then(function(changedUser) {
+        response
+          .status(200)
+          .json({
+            message: 'your details have been changed successfully',
+            data: changedUser.toJSON()
           });
+      });
 
   },
 
@@ -136,37 +167,35 @@ module.exports = {
   deleteUser: function(request, response) {
     user
       .where({username: request.params.username})
-        .destroy()
-          .then(function(deletedUser) {
-            response
-              .status(200)
-                .json({
-                  message: 'user was successfully deleted',
-                  data: deletedUser.toJSON()
-                });
+      .destroy()
+      .then(function(deletedUser) {
+        response
+          .status(204)
+          .json({
+            message: 'user was successfully deleted',
           });
+      });
 
   },
 
-  //successful simple login
+  //successful login using bcrypt
   login: function(request, response) {
     if(!(request.body.username && request.body.password)) {
       response
         .status(400)
-          .json({
-            message: 'Username and Password Required'
-          });
+        .json({
+          message: 'Username and Password Required'
+        });
     }
     else {
         user
           .where({
-            username: request.body.username,
-            password: request.body.password
+            username: request.body.username
           })
           .fetch()
-            .then(function(dbuser) {
-              if(dbuser){
-                console.log(dbuser.attributes);
+          .then(function(dbuser) {
+            bcrypt.compare(request.body.password, dbuser.get('password'), function(err, match) {
+              if(match){
                 var profile = {
                   username: dbuser.attributes.username,
                   password: dbuser.attributes.password
@@ -176,10 +205,10 @@ module.exports = {
 
                 response
                   .status(200)
-                    .json({
-                      message: 'you are signed in',
-                      access_token: token
-                    });
+                  .json({
+                    message: 'you are signed in',
+                    access_token: token
+                  });
               }
               else {
                 response
@@ -187,7 +216,9 @@ module.exports = {
                     error: 'Incorrect Username/Password'
                   });
               }
+              
             });
+          });
     }
 
   }
