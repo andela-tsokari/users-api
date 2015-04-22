@@ -207,6 +207,7 @@ module.exports = {
                   .status(200)
                   .json({
                     message: 'you are signed in',
+                    username: dbuser.attributes.username,
                     access_token: token
                   });
               }
