@@ -12,6 +12,14 @@ module.exports = function(router) {
     .post(users.login);
 
   router
+    .route('/auth')
+    .get(users.auth);
+
+  /*router
+    .route('/logout')
+    .get(users.logout);*/
+
+  router
     .route('/users')
     .get(users.getAllUsers);
 
