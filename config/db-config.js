@@ -33,7 +33,7 @@ module.exports = {
 
                         },
 
-                    port: process.env.PORT || 4000,
+                    port: process.env.PORT || 3000,
 
                     secret: 'us5rs-1p9'
 
