@@ -13,7 +13,7 @@ module.exports = (function() {
   app
     .use(bodyParser.json())
     .use(bodyParser.urlencoded({extended: true}))
-    .use(cors(corsConfig))
+    .use(cors())
     .use('/api/v1', router);
   
   routes(router);
