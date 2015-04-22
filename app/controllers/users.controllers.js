@@ -65,7 +65,7 @@ module.exports = {
                                   response
                                     .status(200)
                                     .json({
-                                      message: 'user password has been hidden',
+                                      message: 'You have successfully signed up',
                                       data: updatedSavedUser.toJSON()
                                     });
                                 });
@@ -220,6 +220,70 @@ module.exports = {
               
             });
           });
+    }
+
+  },
+
+  auth: function(request, response) {
+    // hWT : header With Token
+
+    var hWT = request.get('Authorization');
+
+    // console.log(hWT);
+
+    var token = hWT.substring(7);
+
+    // console.log(token);
+    
+    var details = jwt.decode(token);
+
+    // console.log(details);
+
+    // checks if the token is valid
+
+    if (details === null) {
+      response
+        .status(401)
+        .json({
+          auth_status: false,
+          message: 'You do not have the authorization for this page'
+        });
+
+    }
+
+    // if token is valid, search for a user in the user's database that matches the user in the token
+    
+    else {
+      user
+        .where({
+          username: details.username
+        })
+        .fetch()
+        .then(function(dbuser) {
+          if(dbuser){
+            response
+              .status(200)
+              .json({
+                user: dbuser.attributes.username,
+                auth_status: true,
+                message: dbuser.attributes.username + ' is registered and authorised'
+              });
+
+          }
+
+          else {
+            response
+              .status(401)
+              .json({
+                user: details.username,
+                auth_status: false,
+                message: details.username + ' is not registered as a User Here. Do Sign Up.'
+              });
+
+          }
+
+        });
+
     }
 
   }
