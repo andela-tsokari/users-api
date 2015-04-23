@@ -117,7 +117,7 @@ module.exports = {
             });
         }
       });
-  
+
   },
 
   //successful request to get one user.
@@ -200,7 +200,7 @@ module.exports = {
                   username: dbuser.attributes.username,
                   password: dbuser.attributes.password
                 }
-                
+
                 var token = jwt.sign(profile, secret);
 
                 response
@@ -217,7 +217,7 @@ module.exports = {
                     error: 'Incorrect Username/Password'
                   });
               }
-              
+
             });
           });
     }
@@ -234,7 +234,7 @@ module.exports = {
     var token = hWT.substring(7);
 
     // console.log(token);
-    
+
     var details = jwt.decode(token);
 
     // console.log(details);
@@ -252,7 +252,7 @@ module.exports = {
     }
 
     // if token is valid, search for a user in the user's database that matches the user in the token
-    
+
     else {
       user
         .where({
@@ -286,6 +286,22 @@ module.exports = {
 
     }
 
+  },
+
+  logout: function(request, response) {
+    console.log(request);
+    user
+      .where({
+        username: request.params.username
+      })
+      .fetch()
+      .then(function(dbuser) {
+        response
+          .status(200)
+          .json({
+            message: dbuser.attributes.username + ' has been logged out'
+          });
+      });
   }
 
 };
