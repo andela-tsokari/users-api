@@ -15,10 +15,10 @@ module.exports = function(router) {
     .route('/auth')
     .get(users.auth);
 
-  /*router
-    .route('/logout')
-    .get(users.logout);*/
-
+  router
+    .route('/:username/logout')
+    .get(users.logout);
+    
   router
     .route('/users')
     .get(users.getAllUsers);
